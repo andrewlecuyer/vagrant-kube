@@ -1,0 +1,67 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require_relative "src/common"
+require_relative "src/master"
+require_relative "src/node"
+
+Vagrant.configure("2") do |config|
+
+  disable_selinux(config)
+  disable_swap(config)
+  enable_ssh_user_pass(config)
+  config_dns(config)
+  config_hosts(config)
+  config_iptables(config)
+  install_common_repos(config)
+  install_common_packages(config)
+  enable_docker(config)
+  enable_kubelet(config)
+
+  config.vm.define "master" do |master|
+
+    master.vm.box = "centos/7"
+
+    master.vm.provider "virtualbox" do |vb|
+      vb.memory = "2048"
+    end
+
+    master.vm.hostname = "master"
+    
+    master.vm.network "private_network", ip: "172.28.2.2"
+
+    bootstrap_cluster(master)
+    prepare_master_kubeconfig(master)
+    deploy_weavenet(master)
+
+  end
+
+  config.vm.define "node01" do |node01|
+
+    node01.vm.box = "centos/7"
+
+    node01.vm.provider "virtualbox" do |vb|
+      vb.memory = "4096"
+      vb.cpus = "2"
+    end
+
+    node01.vm.hostname = "node01"
+    
+    node01.vm.network "private_network", ip: "172.28.2.12"
+
+    install_node_repos(node01)
+    install_node_packages(node01)
+
+    # config_local_docker_registry(node01)
+    fetch_kubeconfig(node01)
+    config_iptables_for_weavenet(node01)
+    join_cluster(node01)
+
+    # config.trigger.after :provision do |trigger|
+    #   node01.vm.provision :reload
+    #   docker_login_vagrant(node01)
+    # end
+
+  end
+
+end
