@@ -16,8 +16,8 @@ def config_hosts(config)
     printf "172.28.2.2 master\n" >> /etc/hosts
     printf "172.28.2.12 node01\n" >> /etc/hosts
     
-    # printf "\n172.28.1.2 util\n" >> /etc/hosts
-    # printf "172.28.1.2 util.io\n\n" >> /etc/hosts
+    printf "\n172.28.1.2 util\n" >> /etc/hosts
+    printf "172.28.1.2 util.io\n\n" >> /etc/hosts
     SHELL
     
 end
